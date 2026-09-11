@@ -1,0 +1,151 @@
+@props([
+    'title' => null,
+    'header' => null,
+])
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-950 text-slate-100 antialiased">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ $title ? $title . ' - ' . config('app.name', 'Laravel') : config('app.name', 'Laravel') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+
+    <!-- Scripts & Styles (Tailwind CDN for instant styling without npm) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
+</head>
+<body class="h-full antialiased font-sans flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <!-- Top Navigation Bar -->
+    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-6">
+                    <!-- Brand / Logo -->
+                    <a href="{{ url('/dashboard') }}" class="flex items-center gap-2 font-bold text-lg text-white hover:text-indigo-400 transition-colors">
+                        <span class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-indigo-600/30">
+                            {{ strtoupper(substr(config('app.name', 'L'), 0, 1)) }}
+                        </span>
+                        <span>{{ config('app.name', 'Laravel') }}</span>
+                    </a>
+
+                    <!-- Navigation Links (Easily add your custom pages here) -->
+                    <div class="hidden md:flex items-center gap-1 text-sm font-medium">
+                        <a href="{{ url('/dashboard') }}" 
+                           class="px-3 py-1.5 rounded-lg transition-colors {{ request()->is('dashboard*') ? 'bg-indigo-600/20 text-indigo-400 font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            Dashboard
+                        </a>
+
+                        <a href="{{ route('profile.edit') }}" 
+                           class="px-3 py-1.5 rounded-lg transition-colors {{ request()->routeIs('profile.edit') ? 'bg-indigo-600/20 text-indigo-400 font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                            Profile
+                        </a>
+
+                        <a href="{{ route('profile.edit') }}#two-factor" 
+                           class="px-3 py-1.5 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-800/60">
+                            2FA Security
+                        </a>
+
+                        {{-- ========================================================= --}}
+                        {{-- [ADD CUSTOM PAGES HERE] --}}
+                        {{-- Example: --}}
+                        {{-- <a href="{{ url('/analytics') }}" class="px-3 py-1.5 rounded-lg transition-colors ...">Analytics</a> --}}
+                        {{-- ========================================================= --}}
+                    </div>
+                </div>
+
+                <!-- Right Header Actions (User info + Logout) -->
+                <div class="flex items-center gap-3">
+                    @auth
+                        <div class="hidden sm:flex flex-col text-right">
+                            <span class="text-sm font-semibold text-white leading-tight">{{ Auth::user()->name }}</span>
+                            <span class="text-xs text-slate-400">{{ Auth::user()->email }}</span>
+                        </div>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" title="Log Out" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 transition-all cursor-pointer">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                <span class="hidden sm:inline">Log Out</span>
+                            </button>
+                        </form>
+                    @endauth
+
+                    <!-- Mobile Menu Toggle Button -->
+                    <button type="button" 
+                            onclick="document.getElementById('mobile-nav-menu').classList.toggle('hidden')"
+                            class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white focus:outline-none"
+                            aria-label="Toggle Navigation">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu (collapsible) -->
+            <div id="mobile-nav-menu" class="hidden md:hidden border-t border-slate-800 py-3 space-y-1">
+                <a href="{{ url('/dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->is('dashboard*') ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300 hover:bg-slate-800' }}">
+                    Dashboard
+                </a>
+                <a href="{{ route('profile.edit') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('profile.edit') ? 'bg-indigo-600/20 text-indigo-400' : 'text-slate-300 hover:bg-slate-800' }}">
+                    Profile
+                </a>
+                <a href="{{ route('profile.edit') }}#two-factor" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800">
+                    2FA Security
+                </a>
+                <!-- Add custom mobile links here -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Optional Page Header Slot -->
+    @isset($header)
+        <header class="border-b border-slate-800/80 bg-slate-900/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                {{ $header }}
+            </div>
+        </header>
+    @endisset
+    @hasSection('header')
+        <header class="border-b border-slate-800/80 bg-slate-900/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                @yield('header')
+            </div>
+        </header>
+    @endif
+
+    <!-- Flash Status Messages -->
+    @if (session('status'))
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center justify-between">
+                <span>{{ session('status') }}</span>
+                <button type="button" onclick="this.parentElement.remove()" class="text-emerald-400/60 hover:text-emerald-300 text-xs">&times;</button>
+            </div>
+        </div>
+    @endif
+
+    {{-- Main Content Slot --}}
+    <main class="flex-1 w-full">
+        {{ $slot ?? '' }}
+        @yield('content')
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>Authentication powered by <span class="text-slate-400 font-medium">Laravel Auth Builder</span></div>
+            <div>Provider &bull; <span class="text-indigo-400 font-medium">Arindam Makar</span></div>
+        </div>
+    </footer>
+</body>
+</html>

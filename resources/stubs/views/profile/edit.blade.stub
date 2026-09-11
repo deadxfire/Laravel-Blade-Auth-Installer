@@ -1,64 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-950 text-slate-100">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ config('app.name', 'Laravel') }} - User Profile</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-
-    <!-- Scripts & Styles (Tailwind CDN for instant styling without npm) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
-<body class="h-full antialiased font-sans flex flex-col bg-slate-950 text-slate-100">
-    <!-- Navigation -->
-    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-6">
-                    <a href="{{ url('/dashboard') }}" class="flex items-center gap-2 font-bold text-lg text-white hover:text-indigo-400 transition-colors">
-                        <span class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-indigo-600/30">
-                            {{ strtoupper(substr(config('app.name', 'L'), 0, 1)) }}
-                        </span>
-                        <span>{{ config('app.name', 'Laravel') }}</span>
-                    </a>
-
-                    <div class="hidden sm:flex items-center gap-4 text-xs font-semibold text-slate-400">
-                        <a href="{{ url('/dashboard') }}" class="hover:text-white transition-colors">Dashboard</a>
-                        <span class="text-slate-600">&bull;</span>
-                        <a href="{{ route('profile.edit') }}" class="text-indigo-400 font-bold">Profile</a>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <div class="hidden sm:flex flex-col text-right">
-                        <span class="text-sm font-semibold text-white leading-tight">{{ $user->name }}</span>
-                        <span class="text-xs text-slate-400">{{ $user->email }}</span>
-                    </div>
-
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 transition-all cursor-pointer">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                            <span>Log Out</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+<x-app-layout title="User Profile">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <!-- Header -->
         <div class="border-b border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -437,14 +378,6 @@
                 </div>
             </form>
         </div>
-    </main>
+    </div>
+</x-app-layout>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>Authentication powered by <span class="text-slate-400 font-medium">Laravel Auth Builder</span></div>
-            <div>Provider &bull; <span class="text-indigo-400 font-medium">Arindam Makar</span></div>
-        </div>
-    </footer>
-</body>
-</html>

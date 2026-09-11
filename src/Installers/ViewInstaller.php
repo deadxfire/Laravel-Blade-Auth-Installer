@@ -28,6 +28,9 @@ class ViewInstaller extends BaseInstaller
         ];
 
         if (! empty($features['login']) || ! empty($features['registration'])) {
+            $planned[] = 'resources/views/layouts/app.blade.php';
+            $planned[] = 'resources/views/components/app-layout.blade.php';
+            $planned[] = 'resources/views/components/layouts/app.blade.php';
             $planned[] = 'resources/views/dashboard.blade.php';
             $planned[] = 'resources/views/profile/edit.blade.php';
         }
@@ -143,8 +146,24 @@ class ViewInstaller extends BaseInstaller
             $replacements
         );
 
-        // 3. Dashboard and Profile Views
+        // 3. Authenticated App Layout, Dashboard, and Profile Views
         if (! empty($features['login']) || ! empty($features['registration'])) {
+            $appLayoutTargets = [
+                'resources/views/layouts/app.blade.php',
+                'resources/views/components/app-layout.blade.php',
+                'resources/views/components/layouts/app.blade.php',
+            ];
+
+            foreach ($appLayoutTargets as $target) {
+                $this->copyStub(
+                    $this->stubPath('views/app-layout.blade.stub'),
+                    $basePath.'/'.$target,
+                    $installedFiles,
+                    $force,
+                    $replacements
+                );
+            }
+
             $this->copyStub(
                 $this->stubPath('views/dashboard.blade.stub'),
                 $basePath.'/resources/views/dashboard.blade.php',
