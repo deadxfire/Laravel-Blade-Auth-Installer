@@ -1,6 +1,6 @@
 {
     "name": "arindammakar/laravel-auth-installer",
-    "description": "Standalone installation client and CLI package for Laravel Auth Builder. Created by Arindam Makar.",
+    "description": "Production-ready, OWASP-hardened Laravel authentication scaffolding with 2FA (TOTP), Dashboard, User Profile, and 5 distinct Blade & Tailwind CSS themes. Zero-build instant setup. Created by Arindam Makar.",
     "type": "library",
     "license": "MIT",
     "homepage": "http://laravelbuild.laureon.in",
@@ -8,10 +8,17 @@
         "laravel",
         "authentication",
         "auth",
+        "two-factor-authentication",
+        "2fa",
+        "totp",
+        "breeze-alternative",
         "starter-kit",
         "blade",
         "tailwind",
-        "auth-builder",
+        "dashboard",
+        "profile",
+        "owasp",
+        "security",
         "arindam-makar"
     ],
     "authors": [
