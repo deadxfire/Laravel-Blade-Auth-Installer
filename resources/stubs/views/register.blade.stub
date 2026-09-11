@@ -1,0 +1,53 @@
+<x-auth.auth-layout title="Create an Account" subtitle="Set up your developer profile to start configuring auth.">
+    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+        @csrf
+
+        <x-auth.input
+            type="text"
+            name="name"
+            label="Full Name"
+            placeholder="Taylor Otwell"
+            autocomplete="name"
+            :required="true"
+            :autofocus="true"
+        />
+
+        <x-auth.input
+            type="email"
+            name="email"
+            label="Email Address"
+            placeholder="developer@example.com"
+            autocomplete="username"
+            :required="true"
+        />
+
+        <x-auth.password-input
+            name="password"
+            label="Password"
+            autocomplete="new-password"
+            placeholder="Minimum 8 characters"
+            :required="true"
+        />
+
+        <x-auth.password-input
+            name="password_confirmation"
+            label="Confirm Password"
+            autocomplete="new-password"
+            placeholder="Repeat password"
+            :required="true"
+        />
+
+        <x-auth.button>
+            Create Account
+        </x-auth.button>
+
+        @if (Route::has('login'))
+            <p class="text-center text-xs text-slate-400 pt-2">
+                Already registered?
+                <a href="{{ route('login') }}" class="font-medium text-indigo-400 hover:text-indigo-300 underline underline-offset-4 focus:outline-none">
+                    Sign in
+                </a>
+            </p>
+        @endif
+    </form>
+</x-auth.auth-layout>

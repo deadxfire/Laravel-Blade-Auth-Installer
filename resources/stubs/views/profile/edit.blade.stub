@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'Laravel') }} - User Profile</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+
+    <!-- Scripts & Styles -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
+</head>
+<body class="h-full antialiased font-sans flex flex-col bg-slate-950 text-slate-100">
+    <!-- Navigation -->
+    <nav class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-6">
+                    <a href="{{ url('/dashboard') }}" class="flex items-center gap-2 font-bold text-lg text-white hover:text-indigo-400 transition-colors">
+                        <span class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-indigo-600/30">
+                            {{ strtoupper(substr(config('app.name', 'L'), 0, 1)) }}
+                        </span>
+                        <span>{{ config('app.name', 'Laravel') }}</span>
+                    </a>
+
+                    <div class="hidden sm:flex items-center gap-4 text-xs font-semibold text-slate-400">
+                        <a href="{{ url('/dashboard') }}" class="hover:text-white transition-colors">Dashboard</a>
+                        <span class="text-slate-600">&bull;</span>
+                        <a href="{{ route('profile.edit') }}" class="text-indigo-400 font-bold">Profile</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span class="text-sm font-semibold text-white leading-tight">{{ $user->name }}</span>
+                        <span class="text-xs text-slate-400">{{ $user->email }}</span>
+                    </div>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            <span>Log Out</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+        <!-- Header -->
+        <div class="border-b border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">Account Settings</h1>
+                <p class="text-sm text-slate-400 mt-1">Manage your profile credentials and security preferences.</p>
+            </div>
+            <div>
+                <a href="{{ url('/dashboard') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+                    &larr; Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Success Notifications -->
+        @if (session('status') === 'profile-updated')
+            <div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Profile details have been successfully updated.</span>
+            </div>
+        @elseif (session('status') === 'password-updated')
+            <div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Your password has been changed securely.</span>
+            </div>
+        @endif
+
+        <!-- 1. Profile Information Form -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl space-y-6">
+            <div class="border-b border-slate-800/80 pb-4">
+                <h2 class="text-lg font-bold text-white">Profile Information</h2>
+                <p class="text-xs text-slate-400 mt-1">Update your account's profile information and email address.</p>
+            </div>
+
+            <form method="POST" action="{{ route('profile.update') }}" class="space-y-5">
+                @csrf
+                @method('patch')
+
+                <div class="space-y-1.5">
+                    <label for="name" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Name</label>
+                    <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        value="{{ old('name', $user->name) }}"
+                        required
+                        autofocus
+                        autocomplete="name"
+                        class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors"
+                    >
+                    @error('name')
+                        <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Email Address</label>
+                    <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value="{{ old('email', $user->email) }}"
+                        required
+                        autocomplete="username"
+                        class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors"
+                    >
+                    @error('email')
+                        <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-2">
+                        <p>Your email address is currently unverified.</p>
+                        <button form="send-verification" class="underline hover:text-amber-200 font-semibold cursor-pointer">
+                            Click here to re-send the verification email.
+                        </button>
+                    </div>
+                @endif
+
+                <div class="pt-2 flex items-center gap-4">
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all cursor-pointer">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+
+            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                <form id="send-verification" method="POST" action="{{ route('verification.send') }}" class="hidden">
+                    @csrf
+                </form>
+            @endif
+        </div>
+
+        <!-- 2. Update Password Form -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl space-y-6">
+            <div class="border-b border-slate-800/80 pb-4">
+                <h2 class="text-lg font-bold text-white">Update Password</h2>
+                <p class="text-xs text-slate-400 mt-1">Ensure your account is using a long, random password to stay secure.</p>
+            </div>
+
+            <form method="POST" action="{{ route('password.update') }}" class="space-y-5">
+                @csrf
+                @method('put')
+
+                <div class="space-y-1.5">
+                    <label for="current_password" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Current Password</label>
+                    <input
+                        type="password"
+                        name="current_password"
+                        id="current_password"
+                        required
+                        autocomplete="current-password"
+                        class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors"
+                    >
+                    @error('current_password')
+                        <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">New Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        required
+                        autocomplete="new-password"
+                        placeholder="Minimum 8 characters"
+                        class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors"
+                    >
+                    @error('password')
+                        <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="password_confirmation" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Confirm New Password</label>
+                    <input
+                        type="password"
+                        name="password_confirmation"
+                        id="password_confirmation"
+                        required
+                        autocomplete="new-password"
+                        placeholder="Repeat new password"
+                        class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors"
+                    >
+                    @error('password_confirmation')
+                        <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all cursor-pointer">
+                        Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. Delete Account (Danger Zone) -->
+        <div class="bg-rose-950/20 border border-rose-900/40 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl space-y-6">
+            <div class="border-b border-rose-900/40 pb-4">
+                <h2 class="text-lg font-bold text-rose-400">Delete Account</h2>
+                <p class="text-xs text-slate-400 mt-1">
+                    Once your account is deleted, all of its resources and data will be permanently wiped.
+                </p>
+            </div>
+
+            <form method="POST" action="{{ route('profile.destroy') }}" onsubmit="return confirm('Are you sure you want to permanently delete your account? This action cannot be undone.');" class="space-y-4">
+                @csrf
+                @method('delete')
+
+                <div class="space-y-1.5 max-w-md">
+                    <label for="delete_password" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Confirm Password to Delete</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="delete_password"
+                        required
+                        placeholder="Enter your password to confirm"
+                        class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-rose-900/60 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 focus:outline-none transition-colors"
+                    >
+                    @error('password', 'userDeletion')
+                        <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/30 transition-all cursor-pointer">
+                        Permanently Delete Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>Authentication powered by <span class="text-slate-400 font-medium">Laravel Auth Builder</span></div>
+            <div>Provider &bull; <span class="text-indigo-400 font-medium">Arindam Makar</span></div>
+        </div>
+    </footer>
+</body>
+</html>
