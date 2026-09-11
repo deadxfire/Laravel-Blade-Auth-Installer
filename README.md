@@ -16,6 +16,8 @@ A developer-friendly CLI installer that imports secure, production-ready authent
 - 🎨 **Multiple Design Presets**: Modern Indigo, Classic Blue, Minimal Monochrome, Slate Zinc, and Simple Clean.
 - 📊 **Complete Dashboard**: Built-in responsive dashboard layout with metrics cards, recent activity, and navigation.
 - 👤 **Full User Profile**: Profile editing, secure password update (with current password verification), and password-confirmed account deletion.
+- 🔐 **Two-Factor Authentication (2FA)**: Zero-dependency pure PHP RFC 6238 TOTP engine (Google Authenticator, Authy, 1Password) with QR code setup, 6-digit confirmation, and emergency recovery codes.
+- ✉️ **Email Verification & Password Confirmation**: Throttled verification notifications and sensitive area password confirmation.
 - 🛡️ **OWASP Hardened**:
   - Open redirect defense on login via path sanitization.
   - Brute-force rate limiting with exponential delays.

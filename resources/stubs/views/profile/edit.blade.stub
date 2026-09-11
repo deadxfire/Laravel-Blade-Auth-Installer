@@ -87,6 +87,27 @@
                 </svg>
                 <span>Your password has been changed securely.</span>
             </div>
+        @elseif (session('status') === 'two-factor-authentication-confirmed')
+            <div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Two-factor authentication has been confirmed and activated for your account.</span>
+            </div>
+        @elseif (session('status') === 'two-factor-authentication-disabled')
+            <div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-sm flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Two-factor authentication has been disabled.</span>
+            </div>
+        @elseif (session('status') === 'recovery-codes-generated')
+            <div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>New emergency recovery codes have been generated. Store them in a safe place.</span>
+            </div>
         @endif
 
         <!-- 1. Profile Information Form -->
@@ -222,7 +243,166 @@
             </form>
         </div>
 
-        <!-- 3. Delete Account (Danger Zone) -->
+        <!-- 3. Two-Factor Authentication (2FA) -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl space-y-6">
+            <div class="border-b border-slate-800/80 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Two-Factor Authentication</h2>
+                    <p class="text-xs text-slate-400 mt-1">Add additional security to your account using a time-based one-time password (TOTP).</p>
+                </div>
+                <div>
+                    @if ($user->two_factor_confirmed_at)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Enabled & Active</span>
+                        </span>
+                    @elseif ($user->two_factor_secret)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                            <span>Pending Confirmation</span>
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                            <span>Disabled</span>
+                        </span>
+                    @endif
+                </div>
+            </div>
+
+            @if (! $user->two_factor_secret)
+                <!-- 2FA Disabled: Enable Prompt -->
+                <div class="space-y-4">
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        When two-factor authentication is enabled, you will be prompted for a secure, 6-digit pin during login. You can retrieve this code from your mobile phone using Google Authenticator, Authy, Microsoft Authenticator, or 1Password.
+                    </p>
+                    <form method="POST" action="{{ route('two-factor.enable') }}">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all cursor-pointer">
+                            Enable Two-Factor Authentication
+                        </button>
+                    </form>
+                </div>
+            @elseif (! $user->two_factor_confirmed_at)
+                <!-- 2FA Enabled but Pending Confirmation -->
+                @php
+                    $rawSecret = decrypt($user->two_factor_secret);
+                    $otpUrl = sprintf('otpauth://totp/%s:%s?secret=%s&issuer=%s', rawurlencode(config('app.name')), rawurlencode($user->email), $rawSecret, rawurlencode(config('app.name')));
+                    $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($otpUrl);
+                @endphp
+                <div class="space-y-6">
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        To finish enabling two-factor authentication, scan the following QR code using your phone's authenticator application, or enter the setup key manually, then provide the generated 6-digit code.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div class="p-2 bg-white rounded-xl shadow-md shrink-0">
+                            <img src="{{ $qrCodeUrl }}" alt="2FA QR Code" class="w-36 h-36">
+                        </div>
+                        <div class="space-y-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Manual Setup Key:</span>
+                            <div class="font-mono text-xs text-indigo-400 select-all bg-slate-900 px-3 py-2 rounded-lg border border-slate-800 break-all">
+                                {{ $rawSecret }}
+                            </div>
+                            <p class="text-[11px] text-slate-500 leading-tight">Supported apps: Google Authenticator, Microsoft Authenticator, Authy, 1Password.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('two-factor.confirm') }}" class="space-y-4 max-w-sm">
+                        @csrf
+                        <div class="space-y-1.5">
+                            <label for="two_factor_code" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">6-Digit Confirmation Code</label>
+                            <input
+                                type="text"
+                                name="code"
+                                id="two_factor_code"
+                                placeholder="123456"
+                                required
+                                autofocus
+                                inputmode="numeric"
+                                autocomplete="one-time-code"
+                                class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors"
+                            >
+                            @error('code')
+                                <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/30 transition-all cursor-pointer">
+                                Confirm & Activate 2FA
+                            </button>
+                        </div>
+                    </form>
+
+                    <form method="POST" action="{{ route('two-factor.disable') }}">
+                        @csrf
+                        @method('delete')
+                        <input type="hidden" name="password" value="confirming">
+                        <button type="submit" class="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-4">
+                            Cancel Setup
+                        </button>
+                    </form>
+                </div>
+            @else
+                <!-- 2FA Active -->
+                @php
+                    $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes ?? '[]'), true) ?: [];
+                @endphp
+                <div class="space-y-6">
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Two-factor authentication is active. When logging in, you will be prompted for a 6-digit code generated by your authenticator app.
+                    </p>
+
+                    <!-- Recovery Codes -->
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Emergency Recovery Codes</span>
+                            <span class="text-[11px] text-slate-500">Store these securely</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">
+                            Store these emergency recovery codes in a secure password manager. They can be used to recover access to your account if your two-factor authentication device is lost.
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800 select-all">
+                            @foreach ($recoveryCodes as $code)
+                                <div>{{ $code }}</div>
+                            @endforeach
+                        </div>
+
+                        <form method="POST" action="{{ route('two-factor.regenerate-recovery-codes') }}" class="pt-2">
+                            @csrf
+                            <button type="submit" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium underline underline-offset-4 cursor-pointer">
+                                Regenerate Recovery Codes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Disable 2FA Form -->
+                    <form method="POST" action="{{ route('two-factor.disable') }}" class="space-y-4 max-w-md pt-2">
+                        @csrf
+                        @method('delete')
+                        <div class="space-y-1.5">
+                            <label for="disable_2fa_password" class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Confirm Password to Disable 2FA</label>
+                            <input
+                                type="password"
+                                name="password"
+                                id="disable_2fa_password"
+                                required
+                                placeholder="Enter current password"
+                                class="block w-full rounded-xl bg-slate-950 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 border border-slate-700 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 focus:outline-none transition-colors"
+                            >
+                            @error('password')
+                                <p class="text-xs text-rose-400 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600/80 hover:bg-rose-600 text-white shadow-md transition-all cursor-pointer">
+                            Disable Two-Factor Authentication
+                        </button>
+                    </form>
+                </div>
+            @endif
+        </div>
+
+        <!-- 4. Delete Account (Danger Zone) -->
         <div class="bg-rose-950/20 border border-rose-900/40 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl space-y-6">
             <div class="border-b border-rose-900/40 pb-4">
                 <h2 class="text-lg font-bold text-rose-400">Delete Account</h2>

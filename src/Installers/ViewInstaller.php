@@ -56,6 +56,10 @@ class ViewInstaller extends BaseInstaller
             $planned[] = 'resources/views/auth/confirm-password.blade.php';
         }
 
+        if (! empty($features['two_factor'])) {
+            $planned[] = 'resources/views/auth/two-factor-challenge.blade.php';
+        }
+
         return array_values(array_unique($planned));
     }
 
@@ -213,6 +217,16 @@ class ViewInstaller extends BaseInstaller
             $this->copyStub(
                 $this->stubPath('views/confirm-password.blade.stub'),
                 $basePath.'/resources/views/auth/confirm-password.blade.php',
+                $installedFiles,
+                $force,
+                $replacements
+            );
+        }
+
+        if (! empty($features['two_factor'])) {
+            $this->copyStub(
+                $this->stubPath('views/auth/two-factor-challenge.blade.stub'),
+                $basePath.'/resources/views/auth/two-factor-challenge.blade.php',
                 $installedFiles,
                 $force,
                 $replacements

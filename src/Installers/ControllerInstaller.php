@@ -41,6 +41,12 @@ class ControllerInstaller extends BaseInstaller
             $planned[] = 'app/Http/Controllers/Auth/ConfirmablePasswordController.php';
         }
 
+        if (! empty($features['two_factor'])) {
+            $planned[] = 'app/Http/Controllers/Auth/TwoFactorAuthenticatedSessionController.php';
+            $planned[] = 'app/Http/Controllers/Auth/TwoFactorAuthenticationController.php';
+            $planned[] = 'app/Services/Auth/TotpService.php';
+        }
+
         return $planned;
     }
 
@@ -126,6 +132,29 @@ class ControllerInstaller extends BaseInstaller
             $this->copyStub(
                 $this->stubPath('controllers/ConfirmablePasswordController.stub'),
                 $basePath.'/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
+                $installedFiles,
+                $force
+            );
+        }
+
+        if (! empty($features['two_factor'])) {
+            $this->copyStub(
+                $this->stubPath('controllers/TwoFactorAuthenticatedSessionController.stub'),
+                $basePath.'/app/Http/Controllers/Auth/TwoFactorAuthenticatedSessionController.php',
+                $installedFiles,
+                $force
+            );
+
+            $this->copyStub(
+                $this->stubPath('controllers/TwoFactorAuthenticationController.stub'),
+                $basePath.'/app/Http/Controllers/Auth/TwoFactorAuthenticationController.php',
+                $installedFiles,
+                $force
+            );
+
+            $this->copyStub(
+                $this->stubPath('services/TotpService.stub'),
+                $basePath.'/app/Services/Auth/TotpService.php',
                 $installedFiles,
                 $force
             );

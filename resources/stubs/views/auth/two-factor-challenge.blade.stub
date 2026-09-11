@@ -1,0 +1,97 @@
+<x-auth.auth-layout title="Two-Factor Challenge" subtitle="Please confirm access to your account by entering the authentication code provided by your authenticator application.">
+    <div x-data="{ recovery: false }">
+        <form method="POST" action="{{ route('two-factor.login') }}" class="space-y-4">
+            @csrf
+
+            <!-- 6-digit Authenticator Code -->
+            <div x-show="!recovery">
+                <x-auth.input
+                    type="text"
+                    name="code"
+                    label="Authentication Code"
+                    placeholder="123456"
+                    autocomplete="one-time-code"
+                    inputmode="numeric"
+                    autofocus
+                />
+                <p class="mt-1 text-[11px] text-slate-400">Open your authenticator app (Google Authenticator, Authy, etc.) to view your code.</p>
+            </div>
+
+            <!-- Emergency Recovery Code -->
+            <div x-show="recovery" x-cloak style="display: none;">
+                <x-auth.input
+                    type="text"
+                    name="recovery_code"
+                    label="Recovery Code"
+                    placeholder="xxxx-xxxx"
+                    autocomplete="one-time-code"
+                />
+                <p class="mt-1 text-[11px] text-slate-400">Enter one of the emergency recovery codes provided when you enabled two-factor authentication.</p>
+            </div>
+
+            <!-- Toggle between Authenticator Code & Recovery Code -->
+            <div class="flex items-center justify-end text-xs">
+                <button
+                    type="button"
+                    class="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 cursor-pointer focus:outline-none"
+                    x-show="!recovery"
+                    @click="recovery = true; $nextTick(() => document.querySelector('input[name=recovery_code]').focus())"
+                >
+                    Use an emergency recovery code
+                </button>
+                <button
+                    type="button"
+                    class="text-indigo-400 hover:text-indigo-300 underline underline-offset-4 cursor-pointer focus:outline-none"
+                    x-show="recovery"
+                    x-cloak
+                    style="display: none;"
+                    @click="recovery = false; $nextTick(() => document.querySelector('input[name=code]').focus())"
+                >
+                    Use an authenticator code
+                </button>
+            </div>
+
+            <x-auth.button>
+                Log In
+            </x-auth.button>
+
+            <div class="text-center pt-2">
+                <a href="{{ route('login') }}" class="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-4">
+                    &larr; Back to sign in
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Alpine.js fallback for zero-dependency toggling if Alpine is not present in app -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof window.Alpine === 'undefined') {
+                const container = document.querySelector('[x-data]');
+                if (!container) return;
+                let isRecovery = false;
+                const codeDiv = container.querySelector('div[x-show="!recovery"]');
+                const recoveryDiv = container.querySelector('div[x-show="recovery"]');
+                const toRecoveryBtn = container.querySelector('button[x-show="!recovery"]');
+                const toCodeBtn = container.querySelector('button[x-show="recovery"]');
+
+                function update() {
+                    if (isRecovery) {
+                        codeDiv.style.display = 'none';
+                        recoveryDiv.style.display = 'block';
+                        toRecoveryBtn.style.display = 'none';
+                        toCodeBtn.style.display = 'inline';
+                    } else {
+                        codeDiv.style.display = 'block';
+                        recoveryDiv.style.display = 'none';
+                        toRecoveryBtn.style.display = 'inline';
+                        toCodeBtn.style.display = 'none';
+                    }
+                }
+
+                if (toRecoveryBtn) toRecoveryBtn.addEventListener('click', () => { isRecovery = true; update(); });
+                if (toCodeBtn) toCodeBtn.addEventListener('click', () => { isRecovery = false; update(); });
+            }
+        });
+    </script>
+</x-auth.auth-layout>
