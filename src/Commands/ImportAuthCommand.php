@@ -108,11 +108,19 @@ class ImportAuthCommand extends Command
 
         // Step 6 - Prompt for confirmation unless --force
         if (! $force) {
+            $existingFiles = array_filter($plannedFiles, fn ($file) => file_exists(base_path($file)));
+            if (! empty($existingFiles)) {
+                $count = count($existingFiles);
+                $this->line('');
+                $this->warn("Found {$count} existing authentication file(s) that will be updated/overwritten.");
+            }
+
             if (! $this->confirm('Do you wish to proceed with installing these authentication components?', true)) {
                 $this->warn('Installation cancelled by user. No changes were made.');
 
                 return self::SUCCESS;
             }
+            $force = true;
         }
 
         // Step 7 - Execute installation
@@ -133,8 +141,8 @@ class ImportAuthCommand extends Command
         $this->line('');
         $this->line('<fg=white;options=bold>Next Steps:</>');
         $this->line('  1. Run database migrations: <fg=cyan>php artisan migrate</>');
-        $this->line('  2. Compile frontend assets: <fg=cyan>npm run build</>');
-        $this->line('  3. Visit <fg=cyan>/login</> or <fg=cyan>/register</> in your browser');
+        $this->line('  2. Zero-build instant setup: Open <fg=cyan>/login</> or <fg=cyan>/register</> in your browser (Instant Tailwind styling)');
+        $this->line('  3. (Optional for Vite bundling): <fg=cyan>npm run build</>');
         $this->line('');
 
         return self::SUCCESS;

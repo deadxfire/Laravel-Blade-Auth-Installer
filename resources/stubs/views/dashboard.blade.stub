@@ -34,6 +34,8 @@
                         <a href="{{ url('/dashboard') }}" class="text-indigo-400 font-bold">Dashboard</a>
                         <span class="text-slate-600">&bull;</span>
                         <a href="{{ route('profile.edit') }}" class="hover:text-white transition-colors">Profile</a>
+                        <span class="text-slate-600">&bull;</span>
+                        <a href="{{ route('profile.edit') }}#two-factor" class="hover:text-white transition-colors">2FA Security</a>
                     </div>
                 </div>
 
@@ -144,6 +146,17 @@
                 </div>
 
                 <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                        <span class="text-slate-400">Two-Factor Auth (2FA)</span>
+                        @if (! empty(Auth::user()->two_factor_confirmed_at))
+                            <span class="text-emerald-400 font-semibold">&check; Active</span>
+                        @else
+                            <a href="{{ route('profile.edit') }}#two-factor" class="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2">
+                                Configure &rarr;
+                            </a>
+                        @endif
+                    </div>
+
                     <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                         <span class="text-slate-400">CSRF Protection</span>
                         <span class="text-emerald-400 font-semibold">&check; Enabled</span>

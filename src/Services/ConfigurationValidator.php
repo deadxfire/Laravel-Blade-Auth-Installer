@@ -25,6 +25,7 @@ class ConfigurationValidator
         'password_reset',
         'email_verification',
         'remember_me',
+        'two_factor',
     ];
 
     /**
@@ -97,9 +98,6 @@ class ConfigurationValidator
             }
             $features[$featureKey] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
         }
-
-        // 2FA is explicitly not implemented yet in the installer
-        $features['two_factor'] = false;
 
         // Validate Security
         $securityInput = $payload['security'] ?? [];
