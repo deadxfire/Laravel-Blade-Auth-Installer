@@ -16,11 +16,10 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
 
-    <!-- Scripts and Styles -->
+    <!-- Scripts and Styles (Tailwind CDN for instant styling + Vite when compiled) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <script src="https://cdn.tailwindcss.com"></script>
     @endif
 </head>
 <body class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 selection:bg-indigo-500 selection:text-white">
