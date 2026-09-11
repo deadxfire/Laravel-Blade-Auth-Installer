@@ -80,10 +80,17 @@ php artisan auth:import http://laravelbuild.laureon.in/install/slate
 php artisan auth:import http://laravelbuild.laureon.in/install/simple
 ```
 
+### Next Steps after Import:
+
+```bash
+# Run migrations to create 2FA columns on users table
+php artisan migrate
+```
+
 ### Options
 
 ```bash
-# Overwrite existing conflicting files without prompt:
+# Overwrite existing conflicting files to switch theme or update scaffolding:
 php artisan auth:import http://laravelbuild.laureon.in/install/default --force
 
 # Preview what files will be created without modifying the project:
@@ -94,10 +101,12 @@ php artisan auth:import http://laravelbuild.laureon.in/install/default --dry-run
 
 ## What Gets Installed
 
-1. **Controllers** (`app/Http/Controllers/Auth/` + `DashboardController.php` + `ProfileController.php`)
-2. **Form Requests** (`LoginRequest.php`, `RegisterRequest.php`, `ProfileUpdateRequest.php`)
-3. **Views** (`resources/views/auth/*`, `resources/views/components/auth/*`, `resources/views/dashboard.blade.php`, `resources/views/profile/edit.blade.php`)
-4. **Routes** (`routes/auth.php` loaded automatically into `routes/web.php`)
+1. **Controllers**: Authentication controllers (`LoginController.php`, `RegisterController.php`, etc.), `TwoFactorAuthenticationController.php`, `TwoFactorAuthenticatedSessionController.php`, `DashboardController.php`, `ProfileController.php`.
+2. **Services**: Pure RFC 6238 TOTP Engine (`app/Services/Auth/TotpService.php`) &mdash; zero external dependencies required.
+3. **Form Requests**: Validated and throttled inputs (`LoginRequest.php`, `RegisterRequest.php`, `ProfileUpdateRequest.php`).
+4. **Views**: 5 distinct design themes across Blade templates (`resources/views/auth/*`, `resources/views/components/auth/*`, `resources/views/dashboard.blade.php`, `resources/views/profile/edit.blade.php`).
+5. **Routes**: Clean, isolated auth routes (`routes/auth.php` loaded automatically into `routes/web.php`).
+6. **Migrations**: Non-destructive 2FA columns migration (`database/migrations/xxxx_xx_xx_xxxxxx_add_two_factor_columns_to_users_table.php`).
 
 ---
 
